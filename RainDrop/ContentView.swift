@@ -13,22 +13,19 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            // Bottom static yellow circle
+            ExtractedView(isDragging: $isDragging, dragAmount: $dragAmount)
             Circle()
                 .fill(Color.yellow)
                 .frame(width: 100, height: 100)
-            
-            // Draggable circle with cloud.sun.rain.fill icon
             Circle()
-                .fill(isDragging ? Color.red : Color.yellow)
+                .fill(isDragging ? .red : .yellow)
                 .frame(width: 100, height: 100)
                 .overlay(
                     Image(systemName: "cloud.sun.rain.fill")
                         .font(.system(size: 40))
-                        .foregroundColor(.white)
+                        .foregroundColor(.clear)
                 )
                 .offset(dragAmount)
-//                .scaleEffect(isDragging ? 1.2 : 1.0, anchor: isDragging ? .top : .center)
                 .gesture(
                     DragGesture()
                         .onChanged { value in
@@ -42,12 +39,47 @@ struct ContentView: View {
                             }
                         }
                 )
-//                .animation(.easeInOut(duration: 1.0), value: isDragging)
-                .animation(.spring(.smooth, blendDuration: 1.0), value: isDragging)
+                .animation(.easeInOut(duration: 0.5), value: isDragging)
         }
-//        .transition(.)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.gray.opacity(0.2).edgesIgnoringSafeArea(.all))
+    }
+}
+
+struct ExtractedView: View {
+    @Binding var isDragging: Bool
+    @Binding var dragAmount: CGSize
+    
+    var body: some View {
+        Canvas { context, size in
+            let circle = context.resolveSymbol(id: "Circle")!
+            let secondCircle = context.resolveSymbol(id: "SecondCircle")!
+
+            context.addFilter(.alphaThreshold(min: 0.5, color: isDragging ? .yellow : .red))
+            context.addFilter(.blur(radius: 15))
+
+            // Вычисление центральной точки
+            let centerX = size.width / 2
+            let centerY = size.height / 2
+
+            context.drawLayer { ctx in
+                // Отрисовка круга по центру
+                ctx.draw(circle, at: CGPoint(x: centerX, y: centerY))
+                ctx.draw(secondCircle, at: CGPoint(x: centerX, y: centerY))
+            }
+        } symbols: {
+            Circle()
+//                .fill(Color.yellow)
+                .frame(width: 100, height: 100)
+                .tag("Circle")
+            Circle()
+//                .fill(isDragging ? Color.yellow : Color.yellow)
+                .frame(width: 100, height: 100)
+                .offset(dragAmount)
+                .tag("SecondCircle")
+                .animation(.easeInOut(duration: 0.5), value: isDragging)
+            
+        }
     }
 }
 
