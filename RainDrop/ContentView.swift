@@ -13,6 +13,7 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
+            Color.black.ignoresSafeArea()
             ExtractedView(isDragging: $isDragging, dragAmount: $dragAmount)
             Circle()
                 .fill(Color.yellow)
@@ -23,7 +24,7 @@ struct ContentView: View {
                 .overlay(
                     Image(systemName: "cloud.sun.rain.fill")
                         .font(.system(size: 40))
-                        .foregroundColor(.clear)
+                        .foregroundColor(.white)
                 )
                 .offset(dragAmount)
                 .gesture(
@@ -39,8 +40,8 @@ struct ContentView: View {
                             }
                         }
                 )
-                .animation(.easeInOut(duration: 0.5), value: isDragging)
         }
+        .animation(.easeInOut(duration: 1), value: isDragging)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.gray.opacity(0.2).edgesIgnoringSafeArea(.all))
     }
